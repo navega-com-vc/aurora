@@ -61,8 +61,8 @@ console.log(userOrm.getSchema(ORM.MONGO))
 
 // Teste de validação com objeto válido
 try {
-  const result = userOrm.validate(user)
-  console.log('Validação bem-sucedida:', result)
+  userOrm.validate(user)
+  console.log('Validação bem-sucedida')
 } catch (e) {
   console.error('Erro de validação (válido):', e)
 }
@@ -80,10 +80,9 @@ const userInvalido = {
 }
 
 try {
-  const result = userOrm.validate(userInvalido)
-  console.log('Validação inesperadamente bem-sucedida:', result)
+  userOrm.validate(userInvalido)
 } catch (e) {
-  console.error('Erro de validação (inválido):', e)
+  console.log('Erro de validação (inválido):', e)
 }
 
 Aurora.setConfig({
@@ -112,10 +111,9 @@ const test = b.object({
 
 export type People = ReturnType<typeof test2.getType>
 const people: People = {
-  name: 'al',
+  name: 'ale',
   age: 21,
 }
-
 test.validate(people)
 
 // o erro da instancia ta funcionando, só q ao fazer o pick
@@ -135,7 +133,7 @@ const test2 = c.type().pick(test, ['name', 'age'])
 export type Person = ReturnType<typeof test2.getType>
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const person: Person = {
-  name: 'al',
+  name: 'ale',
   age: 21,
 }
 
