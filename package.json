@@ -1,0 +1,43 @@
+{
+  "name": "aurora",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node dist/tests/test.js",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/navega-com-vc/aurora"
+  },
+  "keywords": [
+    "typescript",
+    "util",
+    "sua-lib"
+  ],
+  "authors": [
+    {
+      "name": "Alexandre Damas Murata",
+      "email": "alexandre_murata@hotmail.com"
+    },
+    {
+      "name": "Quando Previdência",
+      "email": ""
+    }
+  ],
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "git+https://github.com/navega-com-vc/aurora/issues"
+  },
+  "homepage": "git+https://github.com/navega-com-vc/aurora",
+  "dependencies": {
+    "@types/node": "^22.15.30",
+    "typescript": "^5.8.3"
+  }
+}

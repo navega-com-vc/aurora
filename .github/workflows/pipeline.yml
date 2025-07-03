@@ -1,0 +1,22 @@
+name: aurora CI-CD
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  quality:
+    uses: navega-com-vc/pipeline-modules/.github/workflows/quality-security-workflow.yml@master
+    with:
+      CANCEL_IN_PROGRESS: false
+      SKIP_AUDIT: true
+    secrets: inherit
+
+  deploy-main:
+    needs: quality
+    uses: navega-com-vc/pipeline-modules/.github/workflows/lib-deploy-main.yml@master
+    secrets: inherit
