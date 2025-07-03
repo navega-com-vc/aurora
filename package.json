@@ -10,7 +10,8 @@
     "build": "tsc",
     "test": "tsc && node dist/tests/test.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "sonar": "sonar-scanner"
   },
   "repository": {
     "type": "git",
