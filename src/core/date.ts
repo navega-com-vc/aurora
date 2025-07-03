@@ -1,9 +1,9 @@
-import { Field, ValidationResult } from '../interfaces/field'
+import { Field } from '../interfaces/field'
 import { AuroraConfig, ORM } from '../types'
 
 export class DateField<IsOptional extends boolean = false> implements Field {
   constructor (
-    private readonly getConfig: () => AuroraConfig
+    private readonly getConfig: () => AuroraConfig,
   ) {}
   private readonly schema: Record<string, any> = {}
   private readonly validation: Record<string, Function> = {}
@@ -20,22 +20,23 @@ export class DateField<IsOptional extends boolean = false> implements Field {
     return this as unknown as DateField<true>
   }
 
-  validate (value: any): ValidationResult {
+  validate (value: any) {
     const required = this.schema.required !== false
     if (value === undefined || value === null) {
-      if (required) return { value, error: 'Field is required' }
-      return { value }
+      if (required) {
+        throw new Error('Field is required')
+      }
     }
     if (!(value instanceof Date) && typeof value !== 'string') {
-      return { value, error: 'Expected date or date string' }
+      throw new Error('Expected date or date string')
     }
     // Essa parte eu valido se a String é uma data válida (Pensando em compatibilidade com outros ORM`s, talvez seja necessário alterar isso no futuro)
     if (typeof value === 'string') {
       const d = new Date(value)
-      if (isNaN(d.getTime())) return { value, error: 'Invalid date string' }
-      return { value: d }
+      if (isNaN(d.getTime())) {
+        throw new Error('Invalid date string')
+      }
     }
-    return { value }
   }
 
   min(minDate: Date | string): DateField<IsOptional> {

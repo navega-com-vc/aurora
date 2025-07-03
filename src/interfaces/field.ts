@@ -1,11 +1,6 @@
-import { ORM } from "../types"
-
-export interface ValidationResult {
-  value: any
-  error?: string
-}
+import { ORM } from '../types'
 
 export interface Field {
   getSchema(orm: ORM): any
-  validate(value: any): ValidationResult
+  validate(value: any): void
 }

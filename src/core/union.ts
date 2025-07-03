@@ -1,10 +1,11 @@
-import { Field, ValidationResult } from '../interfaces/field'
+import { Field } from '../interfaces/field'
 import { AuroraConfig, ORM } from '../types'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class UnionField<Fields extends Field[], IsOptional extends boolean = false> implements Field {
   constructor (
     private readonly fields: Fields,
-    private readonly getConfig: () => AuroraConfig
+    private readonly getConfig: () => AuroraConfig,
   ) {}
 
   private readonly schema: Record<string, any> = {}
@@ -24,11 +25,17 @@ export class UnionField<Fields extends Field[], IsOptional extends boolean = fal
     return this as unknown as UnionField<Fields, true>
   }
 
-  validate (value: any): ValidationResult {
-    for (const field of this.fields) {
-      const result = field.validate(value)
-      if (!result.error) return { value: result.value }
+  validate(value: any) {
+    const required = this.schema.required !== false
+    if (value === undefined || value === null) {
+      if (required) {
+        throw new Error('Field is required')
+      }
+      return
     }
-    return { value, error: 'Value does not match any allowed type' }
+
+    for (const field of this.fields) {
+      field.validate(value)
+    }
   }
 }

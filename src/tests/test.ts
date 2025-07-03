@@ -1,5 +1,6 @@
-import { Aurora } from "../lib/aurora"
-import { ORM } from "../types"
+/* global console */
+import { Aurora } from '../lib/aurora'
+import { ORM } from '../types'
 
 const a = new Aurora()
 const userOrm = a.object({
@@ -38,6 +39,7 @@ export const user: UserType = {
     },
   },
   birthDate: new Date(),
+  // eslint-disable-next-line no-constant-condition
   deathDate: true ? '3000-07-01' : new Date(),
   isIncomeTaxed: true,
   employmentHistory: [
@@ -87,9 +89,9 @@ try {
 Aurora.setConfig({
   custom: {
     string: {
-      min: { error: new Error('test error global') }
-    }
-  }
+      min: { error: new Error('test error global') },
+    },
+  },
 })
 
 const b = new Aurora({
@@ -98,9 +100,9 @@ const b = new Aurora({
       min: {
         error: new Error('test error instance'),
         // validate: (any: any) => { throw new Error('validate function instance') }
-      }
-    }
-  }
+      },
+    },
+  },
 })
 
 const test = b.object({
@@ -111,7 +113,7 @@ const test = b.object({
 export type People = ReturnType<typeof test2.getType>
 const people: People = {
   name: 'al',
-  age: 21
+  age: 21,
 }
 
 test.validate(people)
@@ -121,17 +123,20 @@ test.validate(people)
 const c = new Aurora({
   custom: {
     string: {
-      min: { error: new Error('test error instance') }
-    }
-  }
+      min: { error: new Error('test error instance') },
+    },
+  },
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const test2 = c.type().pick(test, ['name', 'age'])
 
+ 
 export type Person = ReturnType<typeof test2.getType>
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const person: Person = {
   name: 'al',
-  age: 21
+  age: 21,
 }
 
 // test2.validate(person)

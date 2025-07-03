@@ -1,13 +1,13 @@
 import { ArrayField, BooleanField, DateField, IdField, NumberField, ObjectField, StringField, TypeField } from '../core'
 import { Field } from '../interfaces/field'
-import { InferSchema, ORM } from '../types'
+import { InferSchema } from '../types'
 import { AuroraConfig } from '../types/config'
 
 export class Aurora<T extends Record<string, Field> = {}> {
   private readonly schema: { [key: string]: any } = {}
 
   constructor(
-    private readonly instanceConfig?: AuroraConfig
+    private readonly instanceConfig?: AuroraConfig,
   ) { }
 
   static config: AuroraConfig = {}
@@ -38,7 +38,7 @@ export class Aurora<T extends Record<string, Field> = {}> {
       for (const rule of rules) {
         mergedRules[rule] = {
           ...(globalObj?.[rule] || {}),
-          ...(instanceObj?.[rule] || {})
+          ...(instanceObj?.[rule] || {}),
         }
       }
       if (!merged.custom) merged.custom = {}

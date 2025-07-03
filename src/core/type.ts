@@ -1,11 +1,12 @@
 import { Field } from '../interfaces/field'
-import { AuroraConfig, ORM } from '../types'
+import { AuroraConfig } from '../types'
 import { ObjectField } from './object'
 import { UnionField } from './union'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class TypeField<IsOptional extends boolean = false> {
   constructor (
-    private readonly getConfig: () => AuroraConfig
+    private readonly getConfig: () => AuroraConfig,
   ) {}
 
   union<Fields extends Field[]> (fields: Fields): UnionField<Fields, false> {

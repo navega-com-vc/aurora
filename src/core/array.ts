@@ -1,4 +1,4 @@
-import { Field, ValidationResult } from '../interfaces/field'
+import { Field } from '../interfaces/field'
 import { AuroraConfig, InferSchema, ORM } from '../types'
 import { Validation } from '../utils/validation'
 
@@ -8,7 +8,7 @@ export class ArrayField<
 > implements Field {
   constructor(
     private readonly arr: T,
-    private readonly getConfig: () => AuroraConfig
+    private readonly getConfig: () => AuroraConfig,
   ) { }
 
   private readonly schema: Array<Field> = []
@@ -17,7 +17,7 @@ export class ArrayField<
 
   getSchema(orm: ORM) {
     const items = this.arr.map(item =>
-      typeof item.getSchema === 'function' ? item.getSchema(orm) : item
+      typeof item.getSchema === 'function' ? item.getSchema(orm) : item,
     )
     return { type: [items[0]], required: this.required }
   }
@@ -31,35 +31,27 @@ export class ArrayField<
     return this as unknown as ArrayField<T, true>
   }
 
-  validate(value: any): ValidationResult {
+  validate(value: any) {
     if (value === undefined || value === null) {
-      if (this.required === true) return { value, error: 'Field is required' }
-      return { value }
+      if (this.required === true) {
+        throw new Error('Field is required')
+      }
     }
     if (!Array.isArray(value)) {
-      return { value, error: 'Expected array' }
+      throw new Error('Expected array')
     }
 
     Validation.validate(this.validation, value)
 
-    const errors: Record<number, string> = {}
-    const validated: any[] = []
     for (let i = 0; i < this.arr.length; i++) {
       const field = this.arr[i]
-      const result =
-        typeof field.validate === 'function'
-          ? field.validate(value[i])
-          : { value: value[i] }
-      validated[i] = result.value
-      if (result.error) errors[i] = result.error
+      if (typeof field.validate === 'function') {
+        field.validate(value[i])
+      }
     }
-    if (Object.keys(errors).length > 0) {
-      return { value: validated, error: JSON.stringify(errors) }
-    }
-    return { value: validated }
   }
 
-  min(length: number) {
+  min(length: number): ArrayField<T, IsOptional> {
     Validation.validateLengthParameter(length)
     const config = this.getConfig()
     this.validation.min = config.custom?.array?.min?.validate
@@ -72,9 +64,10 @@ export class ArrayField<
           throw new Error(`the array "${arr.toString()}" must be greater than ${length} items`)
         }
       }
+    return this as ArrayField<T, IsOptional>
   }
 
-  max(length: number) {
+  max(length: number): ArrayField<T, IsOptional> {
     Validation.validateLengthParameter(length)
     const config = this.getConfig()
     this.validation.max = config.custom?.array?.max?.validate
@@ -87,9 +80,10 @@ export class ArrayField<
           throw new Error(`the array "${arr.toString()}" must be less than or equal to ${length} items`)
         }
       }
+    return this as ArrayField<T, IsOptional>
   }
 
-  length(length: number) {
+  length(length: number): ArrayField<T, IsOptional> {
     Validation.validateLengthParameter(length)
     const config = this.getConfig()
     this.validation.length = config.custom?.array?.length?.validate
@@ -102,9 +96,10 @@ export class ArrayField<
           throw new Error(`the array "${arr.toString()}" must have exactly ${length} items`)
         }
       }
+    return this as ArrayField<T, IsOptional>
   }
 
-  unique() {
+  unique(): ArrayField<T, IsOptional> {
     const config = this.getConfig()
     this.validation.unique = config.custom?.array?.unique?.validate
       ? config.custom.array.unique.validate
@@ -117,9 +112,10 @@ export class ArrayField<
           throw new Error('the array must have only unique items')
         }
       }
+    return this as ArrayField<T, IsOptional>
   }
 
-  includes(value: any) {
+  includes(value: any): ArrayField<T, IsOptional> {
     const config = this.getConfig()
     this.validation.includes = config.custom?.array?.includes?.validate
       ? config.custom.array.includes.validate
@@ -131,5 +127,6 @@ export class ArrayField<
           throw new Error(`the array must include value: ${value}`)
         }
       }
+    return this as ArrayField<T, IsOptional>
   }
 }

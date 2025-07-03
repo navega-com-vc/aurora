@@ -7,8 +7,10 @@ Ela permite que você defina modelos de dados de forma fluente, **gerando automa
 
 ## Recursos
 
-- **Definição fluente de schemas** (string, number, boolean, date, object, array)
+- **Definição fluente de schemas** (string, number, boolean, date, object, array, id, union, type)
 - **Geração automática de tipos TypeScript** a partir do schema
+- **Validação automática dos dados** com métodos `.validate()`
+- **Validações e erros personalizados** (globais e por instância)
 - **Compatível com MongoDB** (outros ORMs em breve)
 - **Campos opcionais**
 - **Schemas aninhados e arrays tipados**
@@ -77,6 +79,92 @@ const user: UserType = {
 
 ---
 
+## Validação de Dados
+
+Cada campo e schema possui o método `.validate(value)` para validar dados em tempo de execução. O método retorna `{ value, error? }`.
+
+```typescript
+const nameField = a.string().min(3)
+const result = nameField.validate('Jo')
+// result.error: 'the sentence "Jo" must be greater than 3 characters'
+```
+
+Você pode validar objetos inteiros:
+
+```typescript
+const userResult = userOrm.validate({ name: 'Jo' })
+// userResult.error: '{"job":"Field is required", ...}'
+```
+
+---
+
+## Validações e Erros Personalizados
+
+Você pode customizar mensagens de erro e funções de validação globalmente ou por instância:
+
+```typescript
+Aurora.setConfig({
+  custom: {
+    string: {
+      min: {
+        error: 'Nome muito curto!'
+      }
+    }
+  }
+})
+
+const a = new Aurora({
+  custom: {
+    number: {
+      min: {
+        error: 'Número muito pequeno!'
+      }
+    }
+  }
+})
+```
+
+Também é possível definir funções de validação customizadas:
+
+```typescript
+Aurora.setConfig({
+  custom: {
+    string: {
+      regex: {
+        validate: (str: string) => {
+          if (!/^AURORA/.test(str)) throw new Error('Precisa começar com AURORA')
+        },
+        error: 'Precisa começar com AURORA'
+      }
+    }
+  }
+})
+```
+
+---
+
+## Campos Opcionais
+
+Todos os campos possuem o método `.optional()`, tornando-os opcionais no tipo e no schema:
+
+```typescript
+a.string().optional()
+a.object({ ... }).optional()
+a.array([ ... ]).optional()
+```
+
+---
+
+## Campo ID Customizável
+
+O campo `id` permite definir o tipo do ID e a referência (útil para ORMs como o Mongoose):
+
+```typescript
+a.id(String, 'User') // tipo do id e referência
+```
+
+---
+
 ## Como funciona?
 
 1. Criação do Schema
@@ -95,6 +183,8 @@ Depois, utilize os métodos para criar campos:
 - `a.date()`
 - `a.object({...})`
 - `a.array([...])`
+- `a.id(type, reference)`
+- `a.type()`
 
 Campos podem ser aninhados e marcados como opcionais com `.optional()`.
 
@@ -117,16 +207,23 @@ Assim, você garante que qualquer objeto do tipo `UserType` estará sempre sincr
 Para obter o schema pronto para uso no ORM (ex: passar para o Mongoose):
 
 ```typescript
-userOrm.getSchema()
+userOrm.getSchema(ORM.MONGO)
 ```
 
 O resultado será um objeto com a estrutura do schema, incluindo tipos, obrigatoriedade e propriedades aninhadas.
 
 ---
 
-## LIB
+## Extensibilidade e Customização
 
-### Métodos de Aurora
+- **Validações customizadas**: Adicione funções de validação próprias para qualquer campo.
+- **Mensagens de erro customizadas**: Defina mensagens globais ou por instância.
+- **Schemas aninhados**: Combine objetos, arrays e tipos primitivos livremente.
+- **Suporte a outros ORMs**: Arquitetura preparada para expansão.
+
+---
+
+## Métodos de Aurora
 
 | Método         | Descrição                                 |
 | -------------- | ----------------------------------------- |
@@ -136,6 +233,8 @@ O resultado será um objeto com a estrutura do schema, incluindo tipos, obrigato
 | `date()`       | Campo date                                |
 | `object(obj)`  | Campo objeto aninhado                     |
 | `array(arr)`   | Campo array de objetos ou tipos primitivos|
+| `id(type, ref)`| Campo id customizável (tipo e referência) |
+| `type()`       | Campo tipo genérico                       |
 
 Todos os campos possuem o método `.optional()` para torná-los opcionais no tipo e no schema.
 
@@ -155,6 +254,10 @@ const productOrm = a.object({
 })
 
 type ProductType = ReturnType<typeof productOrm.getType>
+
+// Validação
+const result = productOrm.validate({ title: 'A', price: 10 })
+// result.error: '{"metadata":"Field is required"}'
 ```
 
 ---

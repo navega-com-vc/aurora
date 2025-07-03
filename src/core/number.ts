@@ -1,10 +1,10 @@
-import { Field, ValidationResult } from '../interfaces/field'
+import { Field } from '../interfaces/field'
 import { AuroraConfig, ORM } from '../types'
 import { Validation } from '../utils/validation'
 
 export class NumberField<IsOptional extends boolean = false> implements Field {
   constructor (
-    private readonly getConfig: () => AuroraConfig
+    private readonly getConfig: () => AuroraConfig,
   ) {}
   private readonly schema: Record<string, any> = {}
   private readonly validation: Record<string, Function> = {}
@@ -22,19 +22,18 @@ export class NumberField<IsOptional extends boolean = false> implements Field {
     return this as unknown as NumberField<true>
   }
 
-  validate (value: any): ValidationResult {
+  validate (value: any) {
     const required = this.schema.required !== false
     if (value === undefined || value === null) {
-      if (required) return { value, error: 'Field is required' }
-      return { value }
+      if (required) {
+        throw new Error('Field is required')
+      }
+      return
     }
     if (typeof value !== 'number') {
-      return { value, error: 'Expected number' }
+      throw new Error('Expected number')
     }
-
     Validation.validate(this.validation, value)
-
-    return { value }
   }
 
   min(minValue: number): NumberField<IsOptional> {

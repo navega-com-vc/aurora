@@ -1,10 +1,11 @@
-import { Field, ValidationResult } from '../interfaces/field'
+/* global URL */
+import { Field } from '../interfaces/field'
 import { AuroraConfig, ORM } from '../types'
 import { Validation } from '../utils/validation'
 
 export class StringField<IsOptional extends boolean = false> implements Field {
   constructor(
-    private readonly getConfig: () => AuroraConfig
+    private readonly getConfig: () => AuroraConfig,
   ) { }
   private readonly schema: Record<string, any> = {}
   private readonly validation: Record<string, Function> = {}
@@ -21,19 +22,18 @@ export class StringField<IsOptional extends boolean = false> implements Field {
     return this as unknown as StringField<true>
   }
 
-  validate(value: any): ValidationResult {
+  validate(value: any) {
     const required = this.schema.required !== false
-
-    Validation.validate(this.validation, value)
-
     if (value === undefined || value === null) {
-      if (required) return { value, error: 'Field is required' }
-      return { value }
+      if (required) {
+        throw new Error('Field is required')
+      }
+      return
     }
     if (typeof value !== 'string') {
-      return { value, error: 'Expected string' }
+      throw new Error('Expected string')
     }
-    return { value }
+    Validation.validate(this.validation, value)
   }
 
   min(length: number): StringField<IsOptional> {
@@ -41,16 +41,16 @@ export class StringField<IsOptional extends boolean = false> implements Field {
     const config = this.getConfig()
     
     this.validation.min = config.custom?.string?.min?.validate
-    ? config.custom?.string?.min?.validate
-    : (string: string) => {
-      if (string.length < length) {
-        if (config.custom?.string?.min?.error) {
-          throw config.custom?.string.min.error
-        }
+      ? config.custom?.string?.min?.validate
+      : (string: string) => {
+        if (string.length < length) {
+          if (config.custom?.string?.min?.error) {
+            throw config.custom?.string.min.error
+          }
 
-        throw new Error(`the sentence "${string}" must be greater than ${length} characters`)
+          throw new Error(`the sentence "${string}" must be greater than ${length} characters`)
+        }
       }
-    }
     this.schema.minLength = length
     return this as unknown as StringField<IsOptional>
   }
